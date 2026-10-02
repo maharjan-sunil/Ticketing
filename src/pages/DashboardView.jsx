@@ -6,22 +6,18 @@ import { TicketProvider, useTickets } from '../contexts/TicketContext';
 // Wrap the view inside our provider
 export default function DashboardView() {
   return (
-    <TicketProvider>
-      <DashboardContent />
-    </TicketProvider>
+      <DashboardContent />    
   );
 }
 
 // The clean content component
 function DashboardContent() {
   // Grab everything we need straight out of Context!
-  const { tickets, updateStatus } = useTickets(); 
+  const { tickets, updateStatus, isLoading, error } = useTickets();
   const formInputRef = useRef(null);
 
   // 🌟 2. Add useMemo here to calculate your stats using the context data
   const ticketStats = useMemo(() => {
-    console.log("📊 Calculating statistics from Context data...");
-    
     const openCount = tickets.filter(t => t.status === 'Open').length;
     const resolvedCount = tickets.filter(t => t.status === 'Resolved').length;
 
@@ -30,6 +26,12 @@ function DashboardContent() {
       resolved: resolvedCount
     };
   }, [tickets]); // 👈 It watches the 'tickets' array from context!
+
+
+  // 2. Handle the loading state right here for this specific page
+  
+  if (isLoading) return <div>⏳ Loading tickets, please wait...</div>;
+  if (error) return <div>❌ Error: {error}</div>;
 
   return (
     <main className="dashboard-grid">
