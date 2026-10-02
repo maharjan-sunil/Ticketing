@@ -1,28 +1,61 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useReducer } from 'react';
 import { apiClient } from '../api/apiClient';
 
-// 1. Create the radio station
+// 1. Create the context radio station
 const TicketContext = createContext(null);
 
-// 2. Create a custom provider component
+// 2. Define your initial state and reducer function FIRST (at the top)
+const initialState = {
+  isLoading: false,
+  error: null
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'FETCH_TICKETS':
+      return { ...state, isLoading: true, error: null };
+    case 'PROCESSING_COMPLETED':
+      return { ...state, isLoading: false, error: null };
+    case 'FETCH_ERROR':
+      return { ...state, isLoading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+// 3. Create your provider component
 export function TicketProvider({ children }) {
+  // Keep your tickets useState just like you had it!
   const [tickets, setTickets] = useState([]);
+  
+  // Set up the useReducer here so 'dispatch' is available above the useEffect
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   // Fetch data on load
   useEffect(() => {
+    dispatch({ type: 'FETCH_TICKETS' });
+    
     apiClient.get('product')
-      .then((response) => setTickets(response.data || []))
-      .catch((error) => console.error("Error fetching data:", error));
+      .then((response) => {
+        setTickets(response.data || []);
+      })
+      .then(() => {
+        dispatch({ type: 'PROCESSING_COMPLETED' });
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        dispatch({ type: 'FETCH_ERROR', payload: error.message });
+      });
   }, []);
 
   // Action: Add Ticket
   const handleAddTicket = (typedTitle) => {
-    const newTicket = { 
-      id: Date.now(), 
-      jobTitle: typedTitle, 
-      user: "System Admin", 
-      status: "Open", 
-      priority: "Medium" 
+    const newTicket = {
+      id: Date.now(),
+      jobTitle: typedTitle,
+      user: "System Admin",
+      status: "Open",
+      priority: "Medium"
     };
     setTickets((prev) => [...prev, newTicket]);
   };
@@ -34,11 +67,14 @@ export function TicketProvider({ children }) {
     );
   };
 
-  // Bundle the state and actions together to broadcast
+  // Bundle everything together to broadcast to your app
   const value = {
     tickets,
+    isLoading: state.isLoading, // Now you can pass loading state to your components!
+    error: state.error,         // Now you can pass error state to your components!
     addTicket: handleAddTicket,
     updateStatus: handleUpdateStatus,
+    dispatch // Expose dispatch so child components can trigger state changes
   };
 
   return (
@@ -48,7 +84,7 @@ export function TicketProvider({ children }) {
   );
 }
 
-// 3. Create a quick helper hook so we don't have to keep importing useContext(TicketContext)
+// 4. Create your helper hook
 export function useTickets() {
   return useContext(TicketContext);
 }

@@ -2,26 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { apiClient } from '../api/apiClient';
 
+import { useTickets } from '../contexts/TicketContext';
+
 export default function TicketDetailView() {
   const { id } = useParams(); // Grabs the direct ID parameter value from the URL path
   const [ticket, setTicket] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  const { isLoading, error, dispatch } = useTickets();
+  // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-    // Dynamic endpoint lookup using our route param!
+    dispatch({ type: 'FETCH_TICKETS' });
+    
+    
     apiClient.get(`product/${id}`)
       .then((response) => {
         setTicket(response.data);
-        setLoading(false);
+         dispatch({ type: 'PROCESSING_COMPLETED' });
       })
       .catch((err) => {
-        console.error("Could not load specific ticket profile details", err);
-        setLoading(false);
+        dispatch({ type: 'FETCH_ERROR', payload: err.message });
       });
   }, [id]); // Triggers again if route shifts to a different ticket ID
 
-  if (loading) return <p>Loading job analytics metrics...</p>;
+  if (isLoading) return <p>Loading job analytics metrics...</p>;
   if (!ticket) return <p>System Profile Error: Target ID {id} not found. <Link to="/">Return home</Link></p>;
 
   return (

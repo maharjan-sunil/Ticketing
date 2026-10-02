@@ -2,12 +2,14 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardView from './pages/DashboardView';
 import TicketDetailView from './pages/TicketDetailView';
+
+import { TicketProvider } from './contexts/TicketContext';
 import './App.css';
 
 function Header() {
   return (
     <header className="app-header">
-      <h1>🎟️ TicketAlert Dashboard</h1>
+      <h1>🎟️ Ticket Dashboard</h1>
       <p>Real-time job status tracking</p>
     </header>
   );
@@ -16,6 +18,7 @@ function Header() {
 export default function App() {
   return (
     <BrowserRouter>
+      <TicketProvider>
       <div className="app-container">
         <Header />
         
@@ -30,6 +33,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+      </TicketProvider>
     </BrowserRouter>
   );
 }
