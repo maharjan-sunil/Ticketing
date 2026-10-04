@@ -60,6 +60,41 @@ export function TicketProvider({ children }) {
     setTickets((prev) => [...prev, newTicket]);
   };
 
+  // Action: Update Ticket
+  const handleUpdateTicket =  (ticketId, updateData) => {
+    try {
+      //apiClient.put(`/product/${ticketId}`).then((response) => {
+     
+      }
+    catch (error) {
+      console.error("Error updating ticket:", error);
+    }
+  }
+
+  // Action: Delete Ticket
+  const handleDeleteTicket = async (ticketId) => {
+    const confirmation = window.prompt("Are you sure you want to delete this ticket? Type 'DELETE' to confirm.");
+    if (confirmation !== 'DELETE') {
+      return;
+    }
+
+  // Save a copy of the current state in case we need to roll back
+  const originalTickets = [...tickets];
+
+  // Instantly update the UI
+  setTickets((prev) => prev.filter((t) => t.id !== ticketId));
+
+  try {
+    await apiClient.delete(`/product/${ticketId}`);
+  } catch (error) {
+   
+    alert("Failed to delete. Restoring item.");
+    // Revert to original state if the API call fails
+    setTickets(originalTickets);
+  }
+};
+
+
   // Action: Update Status
   const handleUpdateStatus = (ticketId) => {
     setTickets((prev) =>
@@ -74,6 +109,8 @@ export function TicketProvider({ children }) {
     error: state.error,         // Now you can pass error state to your components!
     addTicket: handleAddTicket,
     updateStatus: handleUpdateStatus,
+    updateTicket: handleUpdateTicket, // Expose update function to child components
+    deleteTicket: handleDeleteTicket, // Expose delete function to child components
     dispatch // Expose dispatch so child components can trigger state changes
   };
 

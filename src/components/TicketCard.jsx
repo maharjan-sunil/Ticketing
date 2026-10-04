@@ -1,14 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // 👈 Import Link
 
-export default function TicketCard({ id, jobTitle, user, status, priority, onUpdateStatus }) {
+export default function TicketCard({ id, jobTitle, user, status, priority, onUpdateStatus, onDeleteTicket }) {
   return (
     <div className="ticket-card" style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '6px', margin: '10px 0' }}>
       {/* 🆕 Clicking the title now routes cleanly without refreshing the app */}
       <h3 style={{ margin: '0 0 10px 0' }}>
         <Link to={`/ticket/${id}`} style={{ color: '#2c3e50', textDecoration: 'none', hover: 'underline' }}>
           {jobTitle}
-        </Link>
+        </Link>&nbsp;
+        <button 
+          onClick={() => onDeleteTicket(id)}
+          style={{ marginLeft: '10px', padding: '4px 8px', background: '#e74c3c', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
+        >
+          Delete
+        </button>
       </h3>
       <p style={{ margin: '5px 0', fontSize: '14px', color: '#555' }}>Assigned to: {user}</p>
       <p style={{ margin: '5px 0' }}>Priority: <strong>{priority}</strong></p>
