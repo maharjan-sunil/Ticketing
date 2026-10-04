@@ -13,7 +13,7 @@ export default function DashboardView() {
 // The clean content component
 function DashboardContent() {
   // Grab everything we need straight out of Context!
-  const { tickets, updateStatus, isLoading, error } = useTickets();
+  const { tickets, updateStatus, isLoading, error, deleteTicket } = useTickets();
   const formInputRef = useRef(null);
 
   // 🌟 2. Add useMemo here to calculate your stats using the context data
@@ -60,6 +60,7 @@ function DashboardContent() {
               status={ticket.status}
               priority={ticket.priority}
               onUpdateStatus={updateStatus} 
+              onDeleteTicket={deleteTicket} 
             />
           ))}
         </div>
