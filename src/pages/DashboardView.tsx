@@ -3,10 +3,11 @@ import TicketCard from '../components/TicketCard';
 import TicketForm from '../components/TicketForm';
 import { TicketProvider, useTickets } from '../contexts/TicketContext';
 
+
 // Wrap the view inside our provider
 export default function DashboardView() {
   return (
-      <DashboardContent />    
+    <DashboardContent />
   );
 }
 
@@ -14,12 +15,12 @@ export default function DashboardView() {
 function DashboardContent() {
   // Grab everything we need straight out of Context!
   const { tickets, updateStatus, isLoading, error, deleteTicket } = useTickets();
-  const formInputRef = useRef(null);
+  const formInputRef = useRef<HTMLInputElement | null>(null);
 
   // 🌟 2. Add useMemo here to calculate your stats using the context data
   const ticketStats = useMemo(() => {
-    const openCount = tickets.filter(t => t.status === 'Open').length;
-    const resolvedCount = tickets.filter(t => t.status === 'Resolved').length;
+    const openCount = tickets.filter((t: { status: string }) => t.status === 'Open').length;
+    const resolvedCount = tickets.filter((t: { status: string }) => t.status === 'Resolved').length;
 
     return {
       open: openCount,
@@ -29,7 +30,7 @@ function DashboardContent() {
 
 
   // 2. Handle the loading state right here for this specific page
-  
+
   if (isLoading) return <div>⏳ Loading tickets, please wait...</div>;
   if (error) return <div>❌ Error: {error}</div>;
 
@@ -46,21 +47,21 @@ function DashboardContent() {
           ✅ Resolved: <strong>{ticketStats.resolved}</strong>
         </div>
       </div>
-      
+
       <TicketForm inputRef={formInputRef} />
 
       {tickets.length > 0 ? (
         <div className="ticket-list" style={{ marginTop: '20px' }}>
-          {tickets.map((ticket) => (
+          {tickets.map(ticket => (
             <TicketCard
-              key={ticket.id}
-              id={ticket.id} 
+              key={ticket.id} 
+              id={ticket.id}
               jobTitle={ticket.jobTitle}
               user={ticket.user}
               status={ticket.status}
               priority={ticket.priority}
-              onUpdateStatus={updateStatus} 
-              onDeleteTicket={deleteTicket} 
+              onUpdateStatus={updateStatus}
+              onDeleteTicket={deleteTicket}
             />
           ))}
         </div>

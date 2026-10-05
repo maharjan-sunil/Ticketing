@@ -1,0 +1,37 @@
+// {
+//   "extends": "@tsconfig/vite-react/tsconfig.json",
+//   "compilerOptions": {
+//     "strict": true,
+//     "noUnusedLocals": true,
+//     "noUnusedParameters": true,
+//     "types": ["react", "react-dom"]
+//   },
+//   "include": ["src/**/*"]
+// }
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* 🌟 The Crucial Fixes for Vite Module Resolution */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Explicitly mapping the node types folder fallback */
+    "types": ["vite/client", "react", "react-dom"],
+
+    /* Linting / Safety rules matching your original settings */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src/**/*"]
+}

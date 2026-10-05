@@ -1,16 +1,40 @@
 import React, { createContext, useContext, useState, useEffect, useReducer } from 'react';
 import { apiClient } from '../api/apiClient';
 
+import { Ticket} from '../types/Ticket';
+
+
+interface ReducerState {
+  isLoading: boolean;
+  error: string | null;
+}
+
+type ReducerAction =
+  | { type: 'FETCH_TICKETS' }
+  | { type: 'PROCESSING_COMPLETED' }
+  | { type: 'FETCH_ERROR'; payload: string };
+
+interface TicketContextType {
+  tickets: Ticket[];
+  isLoading: boolean;
+  error: string | null;
+  addTicket: (typedTitle: string) => void;
+  updateStatus: (ticketId: string) => void;
+  updateTicket: (ticketId: string, updateData: Partial<Ticket>) => void;
+  deleteTicket: (ticketId: string) => Promise<void>;
+  dispatch: React.Dispatch<ReducerAction>; // Expose dispatch to child components
+}
+
 // 1. Create the context radio station
-const TicketContext = createContext(null);
+const TicketContext = createContext<TicketContextType | undefined>(undefined);
 
 // 2. Define your initial state and reducer function FIRST (at the top)
-const initialState = {
+const initialState: ReducerState = {
   isLoading: false,
   error: null
 };
 
-const reducer = (state, action) => {
+const reducer = (state: ReducerState, action: ReducerAction) => {
   switch (action.type) {
     case 'FETCH_TICKETS':
       return { ...state, isLoading: true, error: null };
@@ -24,9 +48,9 @@ const reducer = (state, action) => {
 };
 
 // 3. Create your provider component
-export function TicketProvider({ children }) {
+export function TicketProvider({ children }: {children: React.ReactNode}) {
   // Keep your tickets useState just like you had it!
-  const [tickets, setTickets] = useState([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   
   // Set up the useReducer here so 'dispatch' is available above the useEffect
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -36,32 +60,32 @@ export function TicketProvider({ children }) {
     dispatch({ type: 'FETCH_TICKETS' });
     
     apiClient.get('product')
-      .then((response) => {
+      .then((response : { data: Ticket[] }) => {
         setTickets(response.data || []);
       })
       .then(() => {
         dispatch({ type: 'PROCESSING_COMPLETED' });
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.error("Error fetching data:", error);
         dispatch({ type: 'FETCH_ERROR', payload: error.message });
       });
   }, []);
 
   // Action: Add Ticket
-  const handleAddTicket = (typedTitle) => {
+  const handleAddTicket = (typedTitle: string) => {
     const newTicket = {
-      id: Date.now(),
+      id: Date.now().toString(),
       jobTitle: typedTitle,
       user: "System Admin",
       status: "Open",
       priority: "Medium"
     };
-    setTickets((prev) => [...prev, newTicket]);
+    setTickets((prev : Ticket[]) => [...prev, newTicket]);
   };
 
   // Action: Update Ticket
-  const handleUpdateTicket =  (ticketId, updateData) => {
+  const handleUpdateTicket =  (ticketId: string, updateData: Partial<Ticket>) => {
     try {
       //apiClient.put(`/product/${ticketId}`).then((response) => {
      
@@ -72,7 +96,7 @@ export function TicketProvider({ children }) {
   }
 
   // Action: Delete Ticket
-  const handleDeleteTicket = async (ticketId) => {
+  const handleDeleteTicket = async (ticketId : string) => {
     const confirmation = window.prompt("Are you sure you want to delete this ticket? Type 'DELETE' to confirm.");
     if (confirmation !== 'DELETE') {
       return;
@@ -96,7 +120,7 @@ export function TicketProvider({ children }) {
 
 
   // Action: Update Status
-  const handleUpdateStatus = (ticketId) => {
+  const handleUpdateStatus = (ticketId : string) => {
     setTickets((prev) =>
       prev.map((t) => (t.id === ticketId ? { ...t, status: 'Resolved' } : t))
     );
@@ -123,5 +147,9 @@ export function TicketProvider({ children }) {
 
 // 4. Create your helper hook
 export function useTickets() {
-  return useContext(TicketContext);
+  const context = useContext(TicketContext);
+  if (context === undefined) {
+    throw new Error('useTickets must be used within a TicketProvider');
+  }
+  return context;
 }
