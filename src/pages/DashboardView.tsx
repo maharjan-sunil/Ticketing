@@ -1,23 +1,21 @@
-import React, { useRef, useMemo } from 'react'; // 1. Import useMemo
+import { useRef, useMemo } from 'react'; 
 import TicketCard from '../components/TicketCard';
 import TicketForm from '../components/TicketForm';
-import { TicketProvider, useTickets } from '../contexts/TicketContext';
+import { useTickets } from '../contexts/TicketContext';
 
-
-// Wrap the view inside our provider
 export default function DashboardView() {
   return (
     <DashboardContent />
   );
 }
 
-// The clean content component
+
 function DashboardContent() {
-  // Grab everything we need straight out of Context!
+  
   const { tickets, updateStatus, isLoading, error, deleteTicket } = useTickets();
   const formInputRef = useRef<HTMLInputElement | null>(null);
 
-  // 🌟 2. Add useMemo here to calculate your stats using the context data
+  
   const ticketStats = useMemo(() => {
     const openCount = tickets.filter((t: { status: string }) => t.status === 'Open').length;
     const resolvedCount = tickets.filter((t: { status: string }) => t.status === 'Resolved').length;
@@ -26,10 +24,9 @@ function DashboardContent() {
       open: openCount,
       resolved: resolvedCount
     };
-  }, [tickets]); // 👈 It watches the 'tickets' array from context!
+  }, [tickets]); 
 
 
-  // 2. Handle the loading state right here for this specific page
 
   if (isLoading) return <div>⏳ Loading tickets, please wait...</div>;
   if (error) return <div>❌ Error: {error}</div>;
@@ -38,7 +35,6 @@ function DashboardContent() {
     <main className="dashboard-grid">
       <h2>Active Jobs ({tickets.length})</h2>
 
-      {/* 🌟 3. Render the memoized metrics right below the header */}
       <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
         <div style={{ padding: '10px', background: '#ffebeb', borderRadius: '4px', border: '1px solid #ffccd2' }}>
           ⚠️ Open Alerts: <strong>{ticketStats.open}</strong>
@@ -55,11 +51,7 @@ function DashboardContent() {
           {tickets.map(ticket => (
             <TicketCard
               key={ticket.id} 
-              id={ticket.id}
-              jobTitle={ticket.jobTitle}
-              user={ticket.user}
-              status={ticket.status}
-              priority={ticket.priority}
+              ticket = {ticket}
               onUpdateStatus={updateStatus}
               onDeleteTicket={deleteTicket}
             />
