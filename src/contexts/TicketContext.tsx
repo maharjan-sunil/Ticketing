@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useReducer } from 'react';
 import { apiClient } from '../api/apiClient';
 
-import { Ticket} from '../types/Ticket';
+import { Ticket} from '../types/ticket';
 
 
 interface ReducerState {
@@ -22,13 +22,13 @@ interface TicketContextType {
   updateStatus: (ticketId: string) => void;
   updateTicket: (ticketId: string, updateData: Partial<Ticket>) => void;
   deleteTicket: (ticketId: string) => Promise<void>;
-  dispatch: React.Dispatch<ReducerAction>; // Expose dispatch to child components
+  dispatch: React.Dispatch<ReducerAction>; 
 }
 
-// 1. Create the context radio station
+
 const TicketContext = createContext<TicketContextType | undefined>(undefined);
 
-// 2. Define your initial state and reducer function FIRST (at the top)
+
 const initialState: ReducerState = {
   isLoading: false,
   error: null
@@ -67,7 +67,6 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
         dispatch({ type: 'PROCESSING_COMPLETED' });
       })
       .catch((error: any) => {
-        console.error("Error fetching data:", error);
         dispatch({ type: 'FETCH_ERROR', payload: error.message });
       });
   }, []);
@@ -88,7 +87,7 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
   const handleUpdateTicket =  (ticketId: string, updateData: Partial<Ticket>) => {
     try {
       //apiClient.put(`/product/${ticketId}`).then((response) => {
-     
+      console.log(`Ticket ${ticketId} updated with data:`, updateData);   
       }
     catch (error) {
       console.error("Error updating ticket:", error);
@@ -102,7 +101,6 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
       return;
     }
 
-  // Save a copy of the current state in case we need to roll back
   const originalTickets = [...tickets];
 
   // Instantly update the UI
@@ -113,7 +111,7 @@ export function TicketProvider({ children }: {children: React.ReactNode}) {
   } catch (error) {
    
     alert("Failed to delete. Restoring item.");
-    // Revert to original state if the API call fails
+
     setTickets(originalTickets);
   }
 };

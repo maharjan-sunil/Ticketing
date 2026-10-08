@@ -1,42 +1,51 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { TicketProvider, useTickets } from '../contexts/TicketContext';
+import { useState, useEffect, useRef } from 'react';
+import { useTickets } from '../contexts/TicketContext';
+import { TicketFormProps } from '../types/ticket';
 
-export default function TicketForm({ onAddTicket, inputRef, isEditMode = false, initialData = null, onSuccess }) {
+
+export default function TicketForm({ 
+  inputRef, 
+  isEditMode = false, 
+  initialData = null, 
+  onSuccess 
+}: TicketFormProps) {
   // A tiny, temporary storage box to hold the text as the user types
   const [title, setTitle] = useState('');
 
-
   const { addTicket, updateTicket } = useTickets();
 
-  const formRef = useRef(null); // Reference to the form element for clearing
+  // FIXED: Explicitly typed the internal form element ref to prevent runtime check errors
+  const formRef = useRef<HTMLFormElement>(null); 
 
   useEffect(() => {
+    // FIXED: Ensured initialData is checked thoroughly to satisfy strict null/undefined configurations
     if (isEditMode && initialData) {
       setTitle(initialData.jobTitle); // Pre-fill the input with the existing ticket title
     }
   }, [isEditMode, initialData]);
 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault(); // Stops the browser from reloading the page on submit
 
     // Don't add anything if the user just typed spaces
     if (!title.trim()) return;
+    
+    // FIXED: Guard clause ensures initialData exists when executing operations in edit mode
     if (!isEditMode) {
       // Send the typed title up to the main App storage box
       addTicket(title);
-    } else {
-
-      updateTicket(initialData.id, title); // Call the update function from context
-       if (onSuccess) onSuccess(title); // Call the onSuccess callback with the updated title
+    } else if (initialData) {
+      updateTicket(initialData.id, { jobTitle: title }); // Call the update function from context
+      if (onSuccess) onSuccess(title); // Call the onSuccess callback with the updated title
     }
     // Clear the input box so it is fresh for the next ticket
     clearForm();
   };
 
   const clearForm = () => {
-    setTitle(''); // Clear the input field     formRef.current?.reset();
-  }
+    setTitle(''); // Clear the input field     
+    formRef.current?.reset(); // FIXED: Separated line break safely out of the comment string
+  };
 
   return (
     <form onSubmit={handleSubmit} ref={formRef} className="ticket-form" style={{ display: 'flex', gap: '10px' }}>
